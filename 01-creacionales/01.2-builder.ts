@@ -50,24 +50,34 @@ class QueryBuilder {
   }
 
   select(...fields: string[]): QueryBuilder {
-    throw new Error('Method not implemented.');
+    this.fields = fields;
+    return this;
   }
 
   where(condition: string): QueryBuilder {
-    throw new Error('Method not implemented.');
+    this.conditions.push(condition);
+    return this;
   }
 
   orderBy(field: string, direction: 'ASC' | 'DESC' = 'ASC'): QueryBuilder {
-    throw new Error('Method not implemented.');
+    this.orderFields.push(`${field} ${direction}`);
+    return this;
   }
 
   limit(count: number): QueryBuilder {
-    throw new Error('Method not implemented.');
+    this.limitCount = count;
+    return this;
   }
 
   execute(): string {
     // Select id, name, email from users where age > 18 and country = 'Cri' order by name ASC limit 10;
-    throw new Error('Method not implemented.');
+    const fields = this.fields.length > 0 ? this.fields.join(', ') : ' * ';
+    const conditions = this.conditions.length > 0 ? this.conditions.join(' AND ') : '';
+    const order = this.orderFields.length > 0 ? this.orderFields.join(', ') : '';
+    const lim = this.limitCount != 0 ? 'LIMIT ' + this.limitCount + ';' : ';';
+
+    const query: string = `SELECT ${fields} FROM ${this.table} WHERE ${conditions} ORDER BY ${order} ${lim} `;
+    return query;
   }
 }
 
@@ -75,8 +85,10 @@ function main() {
   const usersQuery = new QueryBuilder('users')
     .select('id', 'name', 'email')
     .where('age > 18')
+    .where('email CONTAINS \'@\'')
     .where("country = 'Cri'") // Esto debe de hacer una condición AND
     .orderBy('name', 'ASC')
+    .orderBy('email', 'DESC')
     .limit(10)
     .execute();
 
